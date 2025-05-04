@@ -1,0 +1,39 @@
+.popupWin {
+    position        : absolute;
+    left            : 0px;
+    right           : 0px;
+    top             : 0px;
+    bottom          : 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+    text-align      : center;
+}
+
+.popupWin::before {
+    height        : 100%;
+    display       : inline-block;
+    content       : "";
+    vertical-align: middle;
+}
+
+.popupWin>div {
+    display         : inline-block;
+    background-color: white;
+    border          : solid black 1px;
+    padding         : 5px;
+    user-select     : none;
+    vertical-align  : middle;
+}
+
+.formButton {
+    margin: 3px;
+}
+
+.vrt-form label {
+    display   : block;
+    text-align: right;
+}
+
+.vrt-form input {
+    width : 150px;
+    margin: 3px;
+}

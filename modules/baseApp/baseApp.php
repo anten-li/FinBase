@@ -4,17 +4,27 @@ class baseApp
     static public $config;
     static public $content;
     static public $user;
+
+    /** @var \mysqli */
     static public $cnn;
 
     static function run()
     {
         baseApp::$config = require "config.php";
         baseApp::$content = file_get_contents('php://input');
+
         if (baseApp::$content) {
+            if ($_SERVER["HTTP_CONTENT_TYPE"] == "application/json")
+                baseApp::$content = json_decode(baseApp::$content);
+
             try {
                 baseApp::ModulesInit();
 
-                if (baseApp::$content["mdl"] and baseApp::$content["cmd"]) {
+                if (property_exists(baseApp::$content, "mdl") and property_exists(baseApp::$content, "cmd")) {
+                    $mdl = baseApp::$cnn->real_escape_string(baseApp::$content->mdl);
+                    $cmd = baseApp::$cnn->real_escape_string(baseApp::$content->cmd);
+
+                    baseApp::baseReturn($mdl::$cmd());
                 }
             } catch (Throwable $e) {
                 baseApp::baseReturn($e->getMessage(), true);
@@ -104,5 +114,10 @@ class baseApp
             } else if (is_int($value["vl"])) $vls .= "{$value["vl"]}";
         }
         baseApp::$cnn->query("INSERT INTO $table($flds) VALUES ($vls)");
+    }
+
+    static function Row($vl, $tp = "")
+    {
+        return ["vl" => $vl, "tp" => $tp];
     }
 }

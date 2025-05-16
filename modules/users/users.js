@@ -1,12 +1,12 @@
 "use strict";
 class authForm extends popupWin {
     frm;
-    fn;
+    onAuthEx;
     constructor(fn = usr => { }) {
         super("", ["ок"], (button, std) => {
             this.auth(std);
         });
-        this.fn = fn;
+        this.onAuthEx = fn;
 
         this.frm = document.createElement("form");
         this.frm.name = "loginForm";
@@ -36,7 +36,7 @@ class authForm extends popupWin {
 
         new serverCall(
             "users",
-            "auth",
+            "getUserToken",
             resp => { this.onAuth(resp) },
             {},
             { Authorization: "Basic " + baseApp.b64EncodeUnicode(`${usr}:${pwd}`) }
@@ -44,6 +44,7 @@ class authForm extends popupWin {
     }
 
     onAuth(resp) {
-
+        this.close();
+        this.onAuthEx(resp);
     }
 }

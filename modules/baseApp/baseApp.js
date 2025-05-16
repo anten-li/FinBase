@@ -40,22 +40,27 @@ class popupWin {
             btn.classList.add("formButton");
             btn.value = element;
             btn.onclick = ev => {
-                this.close(element, onClose);
+                this.onClose(element, onClose);
             }
         });
     }
-    close(btn = [], fn = (button, std) => { }) {
+    onClose(btn = [], fn = (button, std) => { }) {
         var std = { vl: true };
         fn(btn, std);
-        if (std.vl) this.bkelm.remove();
+        if (std.vl) this.close();
+    }
+    close() {
+        this.bkelm.remove();
     }
 }
 
 class serverCall {
     blk;
+    fn;
     constructor(module, command, fn = resp => { }, prm = {}, headers = {}) {
         prm.mdl = module;
         prm.cmd = command;
+        headers["Content-Type"] = "application/json";
 
         var options = {
             method: "POST",
@@ -64,22 +69,23 @@ class serverCall {
         };
 
         this.blk = new popupWin("загрузка...", []);
-        try {
-            fetch('index.php', options).then(resp => { this.onResp(resp) });
-        } catch (err) {
+        this.fn = fn;
 
-        }
+        fetch('index.php', options)
+            .then(resp => resp.json())
+            .then(jsResp => this.onJSON(jsResp))
+            .catch(err => this.onERR(err));
     }
 
-    onResp(resp) {
-        if (resp.ok) resp.json().then(jsResp => { this.onJSON(jsResp) });
-
+    onERR(err) {
+        this.blk.close();
+        new popupWin(err.message);
     }
 
     onJSON(jsResp) {
-        if (jsResp.err) {
-            this.blk.close();
+        this.blk.close();
 
+        if (jsResp.err) {
             if (jsResp.result == "auth failure") {
                 if (document.forms.loginForm)
                     new popupWin("неверный логин или пароль");
@@ -88,6 +94,6 @@ class serverCall {
             } else {
                 new popupWin(jsResp.result);
             };
-        }
+        } else this.fn(jsResp.result);
     }
 }
